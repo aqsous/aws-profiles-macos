@@ -1,0 +1,3 @@
+[ten-dev]
+aws_access_key_id=ASIASANDBOXKEY00005
+aws_secret_access_key=sandboxSecretKeyNotRealEEEEEEEEEEEEEEEEE

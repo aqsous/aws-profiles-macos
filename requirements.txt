@@ -1,0 +1,10 @@
+# Pinned with hashes: install.sh passes --require-hashes, so pip refuses any
+# artifact that does not match what was reviewed here. Regenerate with:
+#   pip download --no-deps --dest /tmp/w rumps==X pyobjc-core==Y pyobjc-framework-Cocoa==Y
+#   pip hash -a sha256 /tmp/w/*
+rumps==0.4.0 \
+    --hash=sha256:17fb33c21b54b1e25db0d71d1d793dc19dc3c0b7d8c79dc6d833d0cffc8b1596
+pyobjc-core==12.2.2 \
+    --hash=sha256:950bd2d9c74634398c4e3d24ef2f213d4e23d705083697464fa67afedc53c1ad
+pyobjc-framework-Cocoa==12.2.2 \
+    --hash=sha256:600b1723184ca094931330e79355274949965460e23de38628d601b5a967baf9
