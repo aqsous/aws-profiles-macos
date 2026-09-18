@@ -36,6 +36,11 @@ VERSION="$("$VENV/bin/python" -c 'import awsprofiles; print(awsprofiles.__versio
 BUILD="$(date +%Y%m%d%H%M)"
 
 echo "==> Building $APP_DIR (version $VERSION, build $BUILD)"
+# Retire the login item from builds that used the old bundle identifier.
+if [ -f "$HOME/Library/LaunchAgents/com.adham.awsprofiles.plist" ]; then
+  launchctl bootout "gui/$(id -u)/com.adham.awsprofiles" 2>/dev/null || true
+  rm -f "$HOME/Library/LaunchAgents/com.adham.awsprofiles.plist"
+fi
 # Clear out earlier installs so LaunchServices does not keep offering them.
 rm -rf "$APP_DIR" "$INSTALL_DIR/AWSProfiles.app" "$HOME/Applications/AWSProfiles.app"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
@@ -47,7 +52,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 <dict>
   <key>CFBundleName</key><string>AWS Profiles</string>
   <key>CFBundleDisplayName</key><string>AWS Profiles</string>
-  <key>CFBundleIdentifier</key><string>com.adham.awsprofiles</string>
+  <key>CFBundleIdentifier</key><string>io.github.aqsous.awsprofiles</string>
   <key>CFBundleExecutable</key><string>AWSProfiles</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>

@@ -3,7 +3,7 @@
 Calls ``sts:GetCallerIdentity`` — the one AWS action that every principal is
 allowed to perform — and signs it with SigV4 by hand. This deliberately avoids
 depending on boto3 or the ``aws`` CLI so the app keeps working when they are
-missing or, as on this machine, installed for the wrong architecture.
+missing, broken, or installed for the wrong architecture.
 """
 
 from __future__ import annotations

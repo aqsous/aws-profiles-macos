@@ -58,7 +58,7 @@ STATUS_GLYPH = {
     sts.Status.UNKNOWN: "⚪️",
 }
 
-LAUNCH_AGENT = os.path.expanduser("~/Library/LaunchAgents/com.adham.awsprofiles.plist")
+LAUNCH_AGENT = os.path.expanduser("~/Library/LaunchAgents/io.github.aqsous.awsprofiles.plist")
 
 # Running against a throwaway copy of ~/.aws is badged in the menu bar, so a
 # sandbox instance can never be mistaken for the one editing the real file.
@@ -1105,7 +1105,7 @@ PLIST = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.adham.awsprofiles</string>
+  <key>Label</key><string>io.github.aqsous.awsprofiles</string>
   <key>ProgramArguments</key>
   <array>{arguments}</array>
   <key>RunAtLoad</key><true/>
@@ -1131,7 +1131,7 @@ def enable_login_item() -> None:
 
 
 def disable_login_item() -> None:
-    subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}/com.adham.awsprofiles"],
+    subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}/io.github.aqsous.awsprofiles"],
                    check=False, capture_output=True)
     if os.path.exists(LAUNCH_AGENT):
         os.unlink(LAUNCH_AGENT)

@@ -1,20 +1,26 @@
 # AWS Profiles
 
-A macOS app for `~/.aws/credentials`, so that refreshing an expired profile is a
-copy and one click instead of a hand-edit in a text editor.
+A small macOS app for the `~/.aws/credentials` file, for people who work with
+several AWS accounts through IAM Identity Center and are tired of the refresh
+ritual: open the access portal, copy the credential block, open the file in an
+editor, find the right profile, select exactly the old three lines, paste, save,
+hope nothing else moved. Here that is: copy the block, then one click.
 
-```
-┌─ AWS Profiles ──────────────────────────────────────────────────────────┐
-│ [Paste credentials] [New profile…] │ [Use as default] [Check] [Edit…] …  │
-├─────────────────────────────────────────────────────────────────────────┤
-│    Profile                     Type        Status            Access key  │
-│ 🟠 default-1                   Long-lived  Rejected by AWS   AKIA••••SRHL│
-│ 🟢 453841503341_AdminAccess    Temporary   453841503341 · …  ASIA••••NS2Q│
-│ 🔴 002037730894_AdminAccess    Temporary   Expired           ASIA••••C4SH│
-├─────────────────────────────────────────────────────────────────────────┤
-│ 9 profiles · 2 working · 2 expired · 5 rejected                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+![The AWS Profiles window: profiles grouped by client, coloured by how much life
+their credentials have left](docs/window.png)
+
+- **Paste and go.** Recognises the portal block, `export` lines, PowerShell,
+  and the JSON from `aws sts assume-role` or `credential_process`. Refuses
+  truncated pastes before they reach the file.
+- **Grouped by client.** Each organisation you sign in to gets a login page and
+  an email; profiles sit under it, and **Login page** opens the right portal
+  with the email ready to paste, then imports the block you copy.
+- **Knows which credentials work.** Checks each profile against AWS and colours
+  expiring and expired ones. Temporary credentials count down.
+- **Never damages the file.** Line-preserving edits, a backup before every
+  change, atomic writes and permission repair. Comments and formatting survive.
+- **No boto3, no CLI.** The AWS call is hand-signed with the standard library,
+  so it works even where the `aws` command is missing or broken.
 
 🟢 works · 🔴 expired · 🟠 rejected by AWS · ⚪️ not checked yet
 
@@ -23,6 +29,12 @@ same actions — but **do not rely on it**: when the menu bar is full macOS
 silently collapses the newest status item behind a `«` chevron. The item still
 reports itself visible and still has a correct title and frame; it simply is not
 drawn. That is why this app has a window and a Dock icon.
+
+## Requirements
+
+macOS 11 or later and Python 3.13 (`brew install python@3.13` if you do not have
+it). The only dependencies are `rumps` and the PyObjC Cocoa bindings, pinned
+with hashes in `requirements.txt`.
 
 ## Install
 
@@ -164,6 +176,33 @@ the client whose portal issues their credentials:
 Clients live in the state file, not in `~/.aws/credentials` or `~/.aws/config`,
 so nothing AWS reads is altered.
 
+## Security
+
+What the app does with your credentials, in full:
+
+- **They stay in `~/.aws/credentials`, in plain text**, because that is the file
+  every AWS SDK, the CLI and Terraform read. The app does not move them into a
+  keychain or its own store. Its job is to make the edits to that file safe: it
+  checks the file is mode `0600`, offers to fix it when it is not, backs the
+  file up before every change and writes atomically.
+- **The only network call is `sts:GetCallerIdentity` to `sts.amazonaws.com`**,
+  over TLS, signed locally with SigV4. Redirects are refused so a signed request
+  is never replayed to another host. Nothing else leaves the machine.
+- **Nothing is logged.** Error messages carry masked key ids only. The launcher
+  keeps its log file private.
+- **The clipboard** is read when you ask for an import, and for five minutes
+  after **Login page** so the block you copy imports itself; contents are
+  parsed in memory and discarded unless they are credentials. Secrets you copy
+  out on purpose are wiped after 60 seconds.
+- **State the app keeps** — client login pages and emails, which profile
+  `[default]` mirrors, last known account ids — lives in
+  `~/.aws/.awsprofiles-state.json`, mode `0600`. Backups live in
+  `~/.aws/awsprofiles-backups/`, mode `0700`, and are pruned after 30 days
+  because old snapshots hold old secrets.
+
+If you find a way for the app to leak or corrupt credentials, please report it
+privately through a GitHub security advisory.
+
 ## How it avoids damaging your credentials
 
 This edits a file that is painful to lose, so:
@@ -218,7 +257,7 @@ loses nothing but that cache.
 
 ```sh
 rm -rf "/Applications/AWS Profiles.app"
-rm -f  ~/Library/LaunchAgents/com.adham.awsprofiles.plist
+rm -f  ~/Library/LaunchAgents/io.github.aqsous.awsprofiles.plist
 rm -f  ~/.aws/.awsprofiles-state.json
 rm -rf ~/.aws/awsprofiles-backups   # only once you are sure
 ```
