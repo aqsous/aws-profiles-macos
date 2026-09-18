@@ -1,4 +1,4 @@
-# AWS Profiles
+# AWS Profiles for macOS
 
 A small macOS app for the `~/.aws/credentials` file, for people who work with
 several AWS accounts through IAM Identity Center and are tired of the refresh
