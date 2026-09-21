@@ -87,7 +87,7 @@ TOOLBAR = (
     ("import", "Paste", "square.and.arrow.down", "importClicked:",
      "Import credentials from the clipboard (⌘I)", False),
     ("login", "Login page", "globe", "loginClicked:",
-     "Open this profile's client portal with the sign-in email copied (⌘L)", True),
+     "Open this profile's client portal with the sign-in name copied (⌘L)", True),
     ("default", "Use as default", "star", "defaultClicked:",
      "Copy this profile's credentials into [default] (⌘D)", True),
     ("check", "Check", "checkmark.shield", "checkClicked:",
@@ -500,7 +500,7 @@ class ProfilesWindow(NSObject):
             client = self.controller.store.client(data["_client"])
             self._item(menu, "Open login page", "ctxOpenLogin:", data["_client"])
             if client and client.email:
-                self._item(menu, f"Copy email ({client.email})", "ctxCopyEmail:", data["_client"])
+                self._item(menu, f"Copy sign-in name ({client.email})", "ctxCopyEmail:", data["_client"])
             menu.addItem_(NSMenuItem.separatorItem())
             self._item(menu, "Edit client…", "ctxEditClient:", data["_client"])
             return

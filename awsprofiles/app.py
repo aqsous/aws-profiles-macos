@@ -464,7 +464,7 @@ class AWSProfilesApp(rumps.App):
         heading = rumps.MenuItem(f"{client.name}  ·  {count} profile{'s' if count != 1 else ''}")
         heading.add(rumps.MenuItem(self._login_title(client), callback=self._wrap(self.open_login_page, client.name)))
         if client.email:
-            heading.add(rumps.MenuItem(f"Copy email  ({client.email})",
+            heading.add(rumps.MenuItem(f"Copy sign-in name  ({client.email})",
                                        callback=self._wrap(self.copy_client_email, client.name)))
         heading.add(rumps.MenuItem(_truncate(client.login_url, 60)))
         heading.add(rumps.separator)
@@ -855,7 +855,7 @@ class AWSProfilesApp(rumps.App):
             # the clipboard. Say so once, or nobody would know to press ⌘V.
             if not self.store.preference("login_hint_seen"):
                 if notice(
-                    "Email copied — paste it into the sign-in form",
+                    "Sign-in name copied — paste it into the sign-in form",
                     f"{client.email} is on the clipboard.\n\n"
                     "AWS does not let a link prefill the Username box, so when the login "
                     "page opens, click Username and press ⌘V.",
@@ -879,7 +879,8 @@ class AWSProfilesApp(rumps.App):
         """Show the client form until it validates or is cancelled."""
         name, url, email = (client.name, client.login_url, client.email) if client else ("", "", "")
         while True:
-            answer = form_prompt(title, message, [("Client", name), ("Login URL", url), ("Email", email)])
+            answer = form_prompt(title, message,
+                                 [("Client", name), ("Login URL", url), ("Email/username", email)])
             if answer is None:
                 return None
             name, url, email = answer
@@ -893,7 +894,7 @@ class AWSProfilesApp(rumps.App):
     def add_client(self, _sender=None, assign_to: str | None = None) -> None:
         client = self._client_form(
             "New client",
-            "The access portal you sign in to for this client, and the email you use there.\n"
+            "The access portal you sign in to for this client, and the email or username you use there.\n"
             "Example: https://d-1234567890.awsapps.com/start",
             None,
         )
@@ -936,7 +937,7 @@ class AWSProfilesApp(rumps.App):
         """Pick a client for a profile from a list — the window's Client… button."""
         clients = self.store.list_clients()
         if not clients:
-            if ask("No clients yet", "Add a client first: its login page and sign-in email.", ok="Add client…") == 1:
+            if ask("No clients yet", "Add a client first: its login page and sign-in name.", ok="Add client…") == 1:
                 self.add_client(assign_to=name)
             return
         current = next((p.client for p in self._profiles if p.name == name), None)

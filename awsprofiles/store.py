@@ -93,7 +93,10 @@ class ChangeResult:
 
 @dataclass
 class Client:
-    """One organisation you sign in to: its access portal and the email used there.
+    """One organisation you sign in to: its access portal and the sign-in name used there.
+
+    ``email`` holds whatever the portal's Username box wants: an email address for
+    most Identity Center directories, a plain username for others.
 
     Profiles are grouped under the client whose portal issues their credentials,
     so the menu can take you straight to the right sign-in page.
@@ -422,8 +425,8 @@ class ProfileStore:
             if not login_url.lower().startswith("https://"):
                 raise StoreError("The login URL must start with https:// — AWS portals are never plain http.")
             email = email.strip()
-            if email and ("@" not in email or " " in email):
-                raise StoreError(f"'{email}' does not look like an email address.")
+            if any(ch.isspace() for ch in email):
+                raise StoreError("The email or username cannot contain spaces.")
 
             state = self._load_state()
             state.setdefault("clients", {})[name] = {"login_url": login_url, "email": email}

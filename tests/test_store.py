@@ -223,6 +223,10 @@ class ClientTests(StoreTestCase):
         self.assertEqual(client.login_url, "https://d-123.awsapps.com/start")
         self.assertEqual([c.name for c in self.store.list_clients()], ["acme"])
 
+    def test_a_plain_username_is_accepted_as_the_sign_in_name(self):
+        client = self.store.save_client("corp", "https://corp.awsapps.com/start", "jdoe")
+        self.assertEqual(client.email, "jdoe")
+
     def test_saving_again_updates_in_place(self):
         self.store.save_client("acme", "https://old.example.com", "old@acme.com")
         self.store.save_client("acme", "https://new.example.com")
@@ -236,7 +240,7 @@ class ClientTests(StoreTestCase):
             ("has space", "https://a.example.com", ""),
             ("acme", "", ""),
             ("acme", "ftp://a.example.com", ""),
-            ("acme", "https://a.example.com", "not-an-email"),
+            ("acme", "https://a.example.com", "has a space"),
         ):
             with self.assertRaises(StoreError):
                 self.store.save_client(name, url, email)

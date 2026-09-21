@@ -13,8 +13,8 @@ their credentials have left](docs/window.png)
   and the JSON from `aws sts assume-role` or `credential_process`. Refuses
   truncated pastes before they reach the file.
 - **Grouped by client.** Each organisation you sign in to gets a login page and
-  an email; profiles sit under it, and **Login page** opens the right portal
-  with the email ready to paste, then imports the block you copy.
+  a sign-in name; profiles sit under it, and **Login page** opens the right
+  portal with that name ready to paste, then imports the block you copy.
 - **Knows which credentials work.** Checks each profile against AWS and colours
   expiring and expired ones. Temporary credentials count down.
 - **Never damages the file.** Line-preserving edits, a backup before every
@@ -157,11 +157,12 @@ mirrors, and an ⏳ while the app is waiting for credentials on the clipboard.
 ## Clients: one login page per organisation
 
 Working for several clients means several AWS access portals, each with its
-own sign-in email. A **client** records both, and profiles are grouped under
+own sign-in name, an email address or a plain username. A **client** records
+both, and profiles are grouped under
 the client whose portal issues their credentials:
 
 - **Clients** in the toolbar (⌘K), or **Clients ▸** in the menu bar — add a
-  client (name, login URL, sign-in email; a bare host gets `https://`, and
+  client (name, login URL, email or username; a bare host gets `https://`, and
   only https is accepted), edit or rename it, or remove it.
 - **Client** in a row's right-click menu (or the *Client* submenu in the menu
   bar) groups a profile. A brand-new profile is offered the most recently used

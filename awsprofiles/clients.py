@@ -1,4 +1,4 @@
-"""The Clients sheet: every client's login page and sign-in email in one view.
+"""The Clients sheet: every client's login page and sign-in name in one view.
 
 A list on the left, the selected client's fields on the right. Editing a name,
 URL or email and pressing Save applies it at once; nothing is staged, so the
@@ -80,13 +80,13 @@ class ClientsSheet(NSObject):
         top = HEIGHT - 44
         self.name_field = self._row(content, "Name", x, field_x, field_w, top)
         self.url_field = self._row(content, "Login URL", x, field_x, field_w, top - 34)
-        self.email_field = self._row(content, "Email", x, field_x, field_w, top - 68)
+        self.email_field = self._row(content, "Email or username", x, field_x, field_w, top - 68)
         self.url_field.setPlaceholderString_("https://d-1234567890.awsapps.com/start")
-        self.email_field.setPlaceholderString_("you@example.com")
+        self.email_field.setPlaceholderString_("you@example.com or a portal username")
 
         note = NSTextField.wrappingLabelWithString_(
             "Profiles grouped under a client get a Login page action that opens this URL "
-            "and puts the email on the clipboard for the Username box."
+            "and puts the email or username on the clipboard for the Username box."
         )
         note.setFrame_(NSMakeRect(x, top - 136, WIDTH - x - 20, 46))
         note.setSelectable_(False)
