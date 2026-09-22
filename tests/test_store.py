@@ -368,3 +368,31 @@ class ConcurrencyTests(StoreTestCase):
             self.store.save_client("acme", "http://a.example.com")
         with self.assertRaises(StoreError):
             self.store.open_url("http://a.example.com")
+
+
+class NicknameTests(StoreTestCase):
+    def _profile(self, name):
+        return next(p for p in self.store.list_profiles() if p.name == name)
+
+    def test_nickname_is_shown_first_and_the_real_name_is_kept(self):
+        self.store.set_nickname("ten-dev", "Laura prod")
+        profile = self._profile("ten-dev")
+        self.assertEqual(profile.label, "Laura prod")
+        self.assertIn("ten-dev", profile.display_name)
+        self.assertEqual(self._read(), CREDENTIALS)  # the ini file is untouched
+
+    def test_blank_clears_the_nickname(self):
+        self.store.set_nickname("ten-dev", "x")
+        self.store.set_nickname("ten-dev", "   ")
+        self.assertIsNone(self._profile("ten-dev").nickname)
+        self.assertEqual(self._profile("ten-dev").label, "ten-dev")
+
+    def test_nickname_follows_a_rename(self):
+        self.store.set_nickname("ten-dev", "Laura")
+        self.store.rename("ten-dev", "ten-development")
+        self.assertEqual(self._profile("ten-development").nickname, "Laura")
+
+    def test_overlong_or_multiline_nicknames_are_refused(self):
+        for bad in ("x" * 41, "two\nlines"):
+            with self.assertRaises(StoreError):
+                self.store.set_nickname("ten-dev", bad)

@@ -413,10 +413,12 @@ class AWSProfilesApp(rumps.App):
         status = identity.status if identity else profile.status
         glyph = "🔄" if profile.name in self.checking else STATUS_GLYPH.get(status, "⚪️")
 
-        label = f"{glyph}  {profile.name}"
+        label = f"{glyph}  {profile.label}"
         if profile.mirrors:
             label += f"  (mirrors {profile.mirrors})"
         item = rumps.MenuItem(label)
+        if profile.nickname:
+            item.add(rumps.MenuItem(f"[{profile.name}]"))
         item._menuitem.setIndentationLevel_(indent)
 
         # Read-only facts about the profile, shown greyed out at the top.
@@ -455,6 +457,7 @@ class AWSProfilesApp(rumps.App):
         item.add(rumps.MenuItem("Copy export AWS_PROFILE", callback=self._wrap(self.copy_profile_export, name)))
         item.add(rumps.MenuItem("Copy credentials as env vars…", callback=self._wrap(self.copy_env, name)))
         item.add(rumps.separator)
+        item.add(rumps.MenuItem("Nickname…", callback=self._wrap(self.set_nickname, name)))
         item.add(rumps.MenuItem("Rename…", callback=self._wrap(self.rename_profile, name)))
         item.add(rumps.MenuItem("Delete…", callback=self._wrap(self.delete_profile, name)))
         return item
@@ -536,8 +539,10 @@ class AWSProfilesApp(rumps.App):
         glyph = STATUS_GLYPH.get(identity.status if identity else current.status, "⚪️")
         label = current.mirrors or "default"
         source = next((p for p in profiles if p.name == label), None)
-        if source is not None and source.client:
-            label = f"{source.client} / {label}"
+        if source is not None:
+            label = source.label
+            if source.client:
+                label = f"{source.client} / {label}"
         self.title = f"{SANDBOX_BADGE}{waiting}{glyph} {_truncate(label, 22)}"
 
     @staticmethod
@@ -759,6 +764,22 @@ class AWSProfilesApp(rumps.App):
             return
         self.refresh_all(["default"])
         inform("Default updated", result.message)
+
+    def set_nickname(self, name: str) -> None:
+        """A friendly label for an unwieldy profile name; the ini section is untouched."""
+        profile = next((p for p in self._profiles if p.name == name), None)
+        current = profile.nickname if profile else ""
+        nickname = self._prompt_name(
+            "Nickname", f"A short label for [{name}]. Leave it blank to remove the nickname.", current or ""
+        )
+        if nickname is None:
+            return
+        try:
+            self.store.set_nickname(name, nickname)
+        except StoreError as exc:
+            inform("Nothing was changed", str(exc))
+            return
+        self.rebuild_menu()
 
     def rename_profile(self, name: str) -> None:
         new = self._prompt_name("Rename profile", f"New name for [{name}]:", name)

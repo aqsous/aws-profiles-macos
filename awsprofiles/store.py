@@ -33,6 +33,17 @@ class Profile:
     identity: sts.Identity | None = None
     mirrors: str | None = None  # for [default]: the profile it was copied from
     client: str | None = None  # name of the Client whose portal issues these
+    nickname: str | None = None  # a friendly label; the ini section name stays as is
+
+    @property
+    def label(self) -> str:
+        """What to call this profile in the UI: the nickname when there is one."""
+        return self.nickname or self.name
+
+    @property
+    def display_name(self) -> str:
+        """Nickname first, real section name after it so it is never hidden."""
+        return f"{self.nickname}   ·   {self.name}" if self.nickname else self.name
 
     @property
     def status(self) -> sts.Status:
@@ -215,6 +226,7 @@ class ProfileStore:
                     updated_at=_parse_iso(saved.get("updated_at")),
                     mirrors=state.get("default_mirrors") if name == "default" else None,
                     client=saved.get("client") if saved.get("client") in clients else None,
+                    nickname=saved.get("nickname") or None,
                 )
             )
         return profiles
@@ -482,6 +494,20 @@ class ProfileStore:
             else:
                 saved["client"] = client_name
                 state["last_client"] = client_name
+            self._save_state(state)
+
+    def set_nickname(self, profile_name: str, nickname: str | None) -> None:
+        """Give a profile a friendly label, or clear it with ``None`` or blank."""
+        nickname = (nickname or "").strip()
+        if len(nickname) > 40 or "\n" in nickname:
+            raise StoreError("A nickname is a short label: up to 40 characters, one line.")
+        with self._lock:
+            state = self._load_state()
+            saved = state.setdefault("profiles", {}).setdefault(profile_name, {})
+            if nickname:
+                saved["nickname"] = nickname
+            else:
+                saved.pop("nickname", None)
             self._save_state(state)
 
     def last_client(self) -> Client | None:

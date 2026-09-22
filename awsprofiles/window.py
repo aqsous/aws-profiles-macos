@@ -102,7 +102,7 @@ TOOLBAR = (
 )
 SELECTION_ITEMS = {ident for ident, *_rest, needs in TOOLBAR if needs}
 SELECTION_ACTIONS = {"loginClicked:", "defaultClicked:", "checkClicked:", "editClicked:",
-                     "deleteClicked:", "renameClicked:"}
+                     "deleteClicked:", "renameClicked:", "nicknameClicked:"}
 
 URGENCY_COLOR = {
     "expired": NSColor.systemRedColor,
@@ -342,7 +342,7 @@ class ProfilesWindow(NSObject):
                     state = " · ".join(bits)
             elif profile.name in checking:
                 state = "Checking…"
-            name = profile.name
+            name = profile.display_name
             if profile.mirrors:
                 name += f"  (mirrors {profile.mirrors})"
             remaining = profile.time_left()
@@ -354,7 +354,7 @@ class ProfilesWindow(NSObject):
                 "_client": profile.client,
                 "_urgency": profile.urgency,
                 "_search": " ".join(filter(None, (
-                    profile.name, profile.client, identity.account if identity else None,
+                    profile.name, profile.nickname, profile.client, identity.account if identity else None,
                     identity.role_name if identity else None, profile.access_key_id,
                 ))).lower(),
                 "glyph": "🔄" if profile.name in checking else STATUS_GLYPH.get(status, "⚪️"),
@@ -533,6 +533,7 @@ class ProfilesWindow(NSObject):
         holder.setSubmenu_(picker)
         menu.addItem_(holder)
         menu.addItem_(NSMenuItem.separatorItem())
+        self._item(menu, "Nickname…", "ctxNickname:", name)
         self._item(menu, "Rename…", "ctxRename:", name)
         self._item(menu, "Delete…", "ctxDelete:", name)
 
@@ -574,6 +575,9 @@ class ProfilesWindow(NSObject):
 
     def ctxRename_(self, sender):
         self.controller.rename_profile(sender.representedObject())
+
+    def ctxNickname_(self, sender):
+        self.controller.set_nickname(sender.representedObject())
 
     def ctxDelete_(self, sender):
         self.controller.delete_profile(sender.representedObject())
@@ -646,6 +650,9 @@ class ProfilesWindow(NSObject):
 
     def renameClicked_(self, sender):
         self._with_selection(self.controller.rename_profile)
+
+    def nicknameClicked_(self, sender):
+        self._with_selection(self.controller.set_nickname)
 
     def deleteClicked_(self, sender):
         self._with_selection(self.controller.delete_profile)
@@ -727,6 +734,7 @@ def build_main_menu(target):
         ("Use as Default", "defaultClicked:", "d", NSEventModifierFlagCommand),
         ("Check", "checkClicked:", "r", NSEventModifierFlagCommand | NSEventModifierFlagShift),
         ("Edit Credentials…", "editClicked:", "e", NSEventModifierFlagCommand),
+        ("Nickname…", "nicknameClicked:", "", 0),
         ("Rename…", "renameClicked:", "", 0),
         ("Delete…", "deleteClicked:", "\x08", NSEventModifierFlagCommand),
         (None, None, None, 0),

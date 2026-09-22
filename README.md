@@ -149,6 +149,11 @@ The same operations are in the menu bar item, under each profile's submenu:
 - **Copy credentials as env vars…** — the real secrets, behind a warning, for
   pasting into a remote shell. The clipboard is wiped 60 seconds later unless
   you have copied something else in the meantime.
+- **Nickname…** — a friendly label for a profile whose real name is something
+  like `002037730894_AdministratorAccess`. The nickname is shown first in the
+  window, the menus and the menu bar title, with the real name after it, and
+  the filter matches both. The credentials file is untouched: tools keep using
+  the real name, and `export AWS_PROFILE` copies the real name.
 - **Rename…** / **Delete…** — both also keep `~/.aws/config` in step.
 
 The menu bar title shows the client and profile that `[default]` currently
@@ -244,7 +249,7 @@ awsprofiles/
   window.py     the main window: toolbar, grouped table, context menu
   clients.py    the Clients sheet
   app.py        the menu bar item, dialogs and all the actions
-tests/          82 tests, including a round-trip of your real file
+tests/          87 tests, including a round-trip of your real file
 ```
 
 `sts.py` signs its own requests rather than calling boto3 or the `aws` CLI, so
